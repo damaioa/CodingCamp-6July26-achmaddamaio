@@ -1,0 +1,423 @@
+/* ==========================================================
+   Ledger — Expense & Budget Visualizer
+   Design concept: a single paper receipt, printed and torn
+   from a till. Monospace type, perforated dividers, ink red
+   for outflow, warm paper for the surface.
+   ========================================================== */
+
+:root {
+  --paper: #f4efe3;
+  --paper-alt: #eae1c9;
+  --paper-shadow: #d8cdae;
+  --ink: #24231f;
+  --ink-soft: #6b6558;
+  --red: #b23a2e;
+  --red-soft: #d97b6c;
+  --line: #cfc4a4;
+
+  --accent-food: #d98e3f;
+  --accent-transport: #3e7c8c;
+  --accent-fun: #b23a2e;
+  --accent-1: #7a8c4b;
+  --accent-2: #8c5ea8;
+  --accent-3: #4b6b8c;
+  --accent-4: #c9a227;
+
+  --font-display: 'Space Mono', 'Courier New', monospace;
+  --font-body: 'IBM Plex Mono', 'Courier New', monospace;
+
+  --radius: 2px;
+  color-scheme: light;
+}
+
+body.dark {
+  --paper: #201e19;
+  --paper-alt: #2a2721;
+  --paper-shadow: #14120f;
+  --ink: #ece4d2;
+  --ink-soft: #a99f89;
+  --red: #e2745f;
+  --red-soft: #b2543f;
+  --line: #423d33;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--paper-shadow);
+  background-image:
+    repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0, rgba(0,0,0,0.02) 1px, transparent 1px, transparent 6px);
+  font-family: var(--font-body);
+  color: var(--ink);
+  display: flex;
+  justify-content: center;
+  padding: 32px 12px 64px;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.counter {
+  width: 100%;
+  max-width: 420px;
+  background: var(--paper);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+  position: relative;
+}
+
+/* ---------- Header ---------- */
+
+.counter__header {
+  padding: 28px 24px 20px;
+  text-align: center;
+  position: relative;
+}
+
+.tear-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--paper-alt);
+  color: var(--ink);
+  font-size: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+}
+.tear-btn:hover { transform: rotate(-15deg); }
+.tear-btn:focus-visible,
+input:focus-visible,
+select:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.wordmark {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+
+.balance {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(38px, 11vw, 48px);
+  margin: 10px 0 2px;
+  color: var(--red);
+  font-variant-numeric: tabular-nums;
+  word-break: break-word;
+}
+
+.balance-sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* ---------- Perforation divider ---------- */
+
+.perforation {
+  height: 14px;
+  background:
+    radial-gradient(circle at 7px 7px, var(--paper-shadow) 6px, transparent 6.5px);
+  background-size: 14px 14px;
+  background-repeat: repeat-x;
+  background-position: center;
+  opacity: 0.9;
+}
+.perforation--thin {
+  height: 10px;
+  background-size: 10px 10px;
+  background: radial-gradient(circle at 5px 5px, var(--paper-shadow) 4px, transparent 4.5px);
+  background-repeat: repeat-x;
+  background-position: center;
+  margin: 6px 0;
+}
+
+/* ---------- Body ---------- */
+
+.receipt-body {
+  padding: 4px 24px 24px;
+}
+
+.section-label {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 22px 0 14px;
+}
+
+/* ---------- Form ---------- */
+
+.ticket-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.field--hidden {
+  display: none;
+}
+
+.field input,
+.field select {
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--paper-alt);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  text-transform: none;
+  letter-spacing: normal;
+  width: 100%;
+}
+
+.field input::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.6;
+}
+
+.error-msg {
+  margin: -4px 0 0;
+  min-height: 16px;
+  font-size: 12px;
+  color: var(--red);
+}
+
+.print-btn {
+  margin-top: 6px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 13px;
+  color: var(--paper);
+  background: var(--ink);
+  border: none;
+  border-radius: var(--radius);
+  padding: 13px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+.print-btn:hover { background: var(--red); }
+.print-btn:active { transform: scale(0.98); }
+
+/* ---------- List controls ---------- */
+
+.list-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.list-controls .section-label {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.sort-select {
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 5px 8px;
+}
+
+/* ---------- Transaction list ---------- */
+
+.transaction-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.transaction-list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 2px;
+  border-bottom: 1px dashed var(--line);
+  font-size: 14px;
+  animation: printIn 0.25s ease;
+}
+
+@keyframes printIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tx-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tx-name .tx-cat-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.tx-amount {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--red);
+  white-space: nowrap;
+}
+
+.tx-amount.over-limit {
+  background: var(--red);
+  color: var(--paper);
+  padding: 2px 6px;
+  border-radius: var(--radius);
+}
+
+.tx-delete {
+  background: none;
+  border: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 4px;
+}
+.tx-delete:hover { color: var(--red); }
+
+.empty-state {
+  text-align: center;
+  font-size: 13px;
+  color: var(--ink-soft);
+  padding: 18px 0;
+  display: none;
+}
+.empty-state.is-visible { display: block; }
+
+/* ---------- Chart ---------- */
+
+.chart-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+}
+
+.chart-wrap canvas {
+  max-width: 240px;
+  max-height: 240px;
+}
+
+/* ---------- Monthly summary ---------- */
+
+.monthly-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  border-bottom: 1px dotted var(--line);
+  padding-bottom: 6px;
+}
+
+.summary-row .cat-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-row .cat-name .tx-cat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.summary-row .cat-amount {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Footer ---------- */
+
+.counter__footer {
+  text-align: center;
+  padding: 18px 24px 26px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  letter-spacing: 0.08em;
+}
+.serial { margin: 0 0 6px; }
+.thanks { margin: 0; }
+
+/* ---------- Scrollbar (webkit) ---------- */
+
+.transaction-list::-webkit-scrollbar {
+  width: 6px;
+}
+.transaction-list::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 4px;
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .transaction-list li,
+  .tear-btn,
+  .print-btn {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 380px) {
+  .receipt-body { padding: 4px 16px 20px; }
+  .counter__header { padding: 24px 16px 16px; }
+}
